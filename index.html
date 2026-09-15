@@ -1,0 +1,55 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bio-Challenge</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:linear-gradient(135deg,#e8f5ed,#f6f0df);color:#18372b}
+main{max-width:900px;margin:auto;padding:20px}.head{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}.pill{background:white;border-radius:999px;padding:10px 15px;box-shadow:0 3px 12px #0001;font-weight:700}
+.card{background:#fff;border-radius:25px;padding:28px;margin-top:18px;box-shadow:0 14px 40px #18372b20}h1{font-size:clamp(30px,5vw,48px);margin:8px 0}h2{font-size:clamp(23px,4vw,32px)}p{font-size:19px;line-height:1.5}
+button{font:inherit;width:100%;padding:14px 16px;margin:6px 0;border:2px solid #d8eade;background:#fff;border-radius:14px;text-align:left;cursor:pointer}
+button:hover{border-color:#347c5c}.primary{background:#347c5c;color:#fff;border:0;text-align:center;font-weight:800}.risk{background:#fff4cf;border-color:#e6bd43}
+.good{background:#dff4e6!important;border-color:#278553!important}.bad{background:#f8dddd!important;border-color:#b74747!important}
+.progress{height:10px;background:#dce7df;border-radius:10px;overflow:hidden;margin:15px 0}.bar{height:100%;background:#347c5c;width:0}.emoji{font-size:65px}.center{text-align:center}.feedback{font-weight:700;min-height:35px;margin:12px 0}.tag{font-size:14px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#347c5c}
+.timer{font-size:30px;font-weight:900;text-align:center}.hint{background:#f1f6f2;border-radius:12px;padding:12px;margin:10px 0}.hidden{display:none}
+input{font:inherit;width:100%;padding:14px;border:2px solid #d8eade;border-radius:12px;margin:8px 0}
+</style></head><body><main>
+<div class="head"><div class="pill">Bio-Challenge</div><div class="pill" id="level">Level 1</div><div class="pill" id="score">0 Punkte</div></div>
+<div class="progress"><div class="bar" id="bar"></div></div><section class="card" id="s"></section>
+</main><script>
+let pts=0,i=-1,locked=false,timer=null;
+const Q=[
+{type:"mc",tag:"Körper-Check",q:"Welche Aussage über die Wirbelsäule ist richtig?",a:["Sie besteht nur aus einem einzigen langen Knochen.","Zwischen vielen Wirbeln liegen Bandscheiben, die Belastungen abfedern.","Die Halswirbelsäule besitzt die meisten Wirbel."],c:1,why:"Die Wirbelsäule besteht aus einzelnen Wirbeln. Zwischen vielen Wirbeln liegen Bandscheiben."},
+{type:"clues",tag:"Drei-Hinweise-Rätsel",q:"Welches einheimische Säugetier suchen wir?",h:["Hinweis 1: Ich bin ein Raubtier.","Hinweis 2: Ich jage häufig in der Dämmerung und nachts.","Hinweis 3: Mein buschiger Schwanz wird auch „Lunte“ genannt."],a:["Dachs","Rotfuchs","Steinmarder"],c:1,why:"Gesucht war der Rotfuchs. Sein Schwanz wird in der Jägersprache Lunte genannt."},
+{type:"mc",tag:"Denk-Challenge",q:"Der Beuger des Oberarms zieht sich zusammen. Was muss gleichzeitig mit seinem Gegenspieler passieren?",a:["Der Strecker muss sich ebenfalls stark zusammenziehen.","Der Strecker muss nachgeben bzw. entspannt werden.","Beide Muskeln werden länger."],c:1,why:"Muskeln arbeiten als Gegenspieler: Beim Beugen zieht sich der Beuger zusammen, während der Strecker nachgibt."},
+{type:"mc",tag:"Fehlerdetektiv",q:"Lena sagt: „Bandscheiben machen die Wirbelsäule völlig starr.“ Welche Verbesserung ist am besten?",a:["Bandscheiben verbinden den Schädel mit der Wirbelsäule.","Bandscheiben ermöglichen Beweglichkeit und helfen, Stöße abzufedern.","Bandscheiben befinden sich nur in der Halswirbelsäule."],c:1,why:"Bandscheiben tragen zur Beweglichkeit bei und wirken als Stoßdämpfer."},
+{type:"clues",tag:"Tierdetektiv",q:"Wer bin ich?",h:["Hinweis 1: Ich bin ein Säugetier.","Hinweis 2: Ich bin ein Paarhufer.","Hinweis 3: Das Männchen trägt ein Geweih, das jährlich abgeworfen wird."],a:["Reh","Fuchs","Dachs"],c:0,why:"Das Reh ist ein Paarhufer. Der männliche Rehbock trägt ein Geweih."},
+{type:"risk",tag:"RISIKO-CHALLENGE",q:"Was schützt das Rückenmark hauptsächlich?",a:["Die Wirbelsäule","Die Rippen","Das Becken"],c:0,why:"Das Rückenmark verläuft geschützt im Wirbelkanal.",risk:2},
+{type:"mc",tag:"Transfer-Challenge",q:"Warum kann die Doppel-S-Form der Wirbelsäule beim Gehen und Springen nützlich sein?",a:["Sie macht die Wirbelsäule möglichst unbeweglich.","Sie hilft dabei, Erschütterungen abzufedern.","Sie verhindert jede Belastung der Bandscheiben."],c:1,why:"Die Form der Wirbelsäule trägt dazu bei, Belastungen und Erschütterungen abzufedern."},
+{type:"clues",tag:"Drei-Hinweise-Rätsel",q:"Welches Tier wird gesucht?",h:["Hinweis 1: Ich bin vor allem dämmerungs- und nachtaktiv.","Hinweis 2: Meine Nahrung besteht unter anderem aus wirbellosen Tieren.","Hinweis 3: Bei Gefahr rolle ich mich zusammen."],a:["Igel","Eichhörnchen","Feldhase"],c:0,why:"Gesucht war der Igel."},
+{type:"mc",tag:"Logik-Challenge",q:"Welche Reihenfolge beschreibt die Wirbelsäule von oben nach unten am besten?",a:["Hals – Brust – Lende – Kreuzbein – Steißbein","Brust – Hals – Lende – Steißbein – Kreuzbein","Hals – Lende – Brust – Kreuzbein – Steißbein"],c:0,why:"Halswirbelsäule → Brustwirbelsäule → Lendenwirbelsäule → Kreuzbein → Steißbein."},
+{type:"mc",tag:"Säugetier-Profi",q:"Welche Gemeinsamkeit besitzen Reh, Eichhörnchen und Fledermaus?",a:["Alle halten Winterschlaf.","Alle bringen lebende Junge zur Welt und säugen ihren Nachwuchs.","Alle ernähren sich ausschließlich von Pflanzen."],c:1,why:"Sie gehören zu den Säugetieren. Typisch ist das Säugen der Jungtiere."},
+{type:"inputs",tag:"Säugetier-Challenge",q:"Trage sechs verschiedene einheimische Säugetiere ein.",why:"Beispiele sind z. B. Reh, Rothirsch, Wildschwein, Rotfuchs, Dachs, Igel, Eichhörnchen, Feldhase, Fledermaus oder Maulwurf."},
+{type:"risk",tag:"FINAL-RÄTSEL · 3 Punkte",q:"Ein Tier kann aktiv fliegen. Sein Körper ist behaart, die Jungen werden gesäugt und es orientiert sich nachts unter anderem mithilfe von Schall. Welche Kombination ist korrekt?",a:["Fledermaus – Säugetier – Echoortung","Eule – Säugetier – Echoortung","Fledermaus – Vogel – Ultraschallsehen"],c:0,why:"Fledermäuse sind die einzigen Säugetiere, die aktiv fliegen können. Viele Arten nutzen Echoortung.",risk:3}
+];
+function intro(){s.innerHTML=`<div class="center"><h1>Bio-Challenge</h1><h2>Mensch & einheimische Säugetiere</h2><p>12 Aufgaben – aber diesmal wird nicht nur geklickt: Du löst Tier-Rätsel, findest Fehler, bearbeitest eine freie Säugetier-Aufgabe und wagst dich an Risikofragen.</p><div class="hint"><b>Tipp:</b> Lies genau und überlege erst, bevor du antwortest. Bei Risiko-Challenges gibt es mehr Punkte!</div><button class="primary" onclick="next()">Spiel starten</button></div>`}intro();
+function update(){score.textContent=""+pts+" Punkte";level.textContent=i<4?"Level 1 · Warm-up":i<8?"Level 2 · Bio-Checker":"Level 3 · Experten";bar.style.width=Math.max(0,(i/Q.length)*100)+"%"}
+function next(){clearInterval(timer);i++;locked=false;update();if(i>=Q.length)return finish();let z=Q[i];
+let h=z.h?z.h.map((x,k)=>`<div class="hint ${k?'hidden':''}" id="h${k}">${x}</div>`).join(""):"";
+if(z.type==="inputs"){s.innerHTML=`<div class="tag">${z.tag}</div><h2>${z.q}</h2><p>Schreibe in jede Lücke ein anderes Tier.</p>
+<div id="mammals">${[1,2,3,4,5,6].map(n=>`<input id="m${n}" placeholder="${n}. Säugetier" autocomplete="off">`).join("")}</div>
+<div class="feedback" id="ifb"></div><button class="primary" onclick="checkMammals()">Antworten prüfen</button>`;return}
+if(z.type==="timer"){s.innerHTML=`<div class="tag">${z.tag}</div><h2>${z.q}</h2><div class="timer" id="time">20</div><button class="primary" onclick="goTimer()">▶ Timer starten</button><div id="tf"></div>`;return}
+let opts=z.a.map((x,n)=>`<button onclick="ans(${n},this)">${String.fromCharCode(65+n)} · ${x}</button>`).join("");
+s.innerHTML=`<div class="tag">${z.tag}</div><h2>${z.q}</h2>${h}${z.h?'<button id="hintbtn" onclick="hint()">Nächsten Hinweis aufdecken</button>':''}${z.type==="risk"?'<div class="hint">Diese Aufgabe ist mehr wert: <b>'+z.risk+' Punkte!</b></div>':""}<div id="opts">${opts}</div><div class="feedback" id="fb"></div><button class="primary hidden" id="nxt" onclick="next()">Weiter →</button>`}
+function hint(){let hs=[...document.querySelectorAll('[id^=h]')];let x=hs.find(e=>e.classList.contains("hidden"));if(x)x.classList.remove("hidden");if(!hs.some(e=>e.classList.contains("hidden")))hintbtn.classList.add("hidden")}
+function ans(n,b){if(locked)return;locked=true;let z=Q[i],bs=[...document.querySelectorAll("#opts button")];bs.forEach(x=>x.disabled=true);bs[z.c].classList.add("good");let val=z.risk||1;if(n===z.c){pts+=val;fb.innerHTML="✅ <b>Richtig!</b> "+z.why}else{b.classList.add("bad");fb.innerHTML="❌ <b>Nicht ganz.</b> "+z.why}update();nxt.classList.remove("hidden")}
+function norm(s){return s.toLowerCase().trim().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[- ]/g,"")}
+function checkMammals(){
+ if(locked)return;
+ const valid=["reh","rothirsch","damhirsch","wildschwein","rotfuchs","fuchs","dachs","igel","eichhoernchen","feldhase","hase","wildkaninchen","kaninchen","fledermaus","maulwurf","steinmarder","baummarder","marder","iltis","hermelin","mauswiesel","siebenschlaefer","biber","fischotter","luchs","wolf","wildkatze","waldmaus","feldmaus","spitzmaus","haselmaus","wanderratte","wasserspitzmaus"];
+ let vals=[1,2,3,4,5,6].map(n=>norm(document.getElementById("m"+n).value)).filter(Boolean);
+ let unique=[...new Set(vals)], ok=unique.length===6 && unique.every(v=>valid.includes(v));
+ if(ok){locked=true;pts+=2;update();ifb.innerHTML="✅ <b>Geschafft!</b> Sechs verschiedene einheimische Säugetiere.";document.querySelector("#s .primary").outerHTML='<button class="primary" onclick="next()">Weiter →</button>'}
+ else {ifb.innerHTML="Noch nicht ganz. Prüfe, ob du <b>sechs verschiedene einheimische Säugetiere</b> eingetragen und richtig geschrieben hast."}
+}
+function goTimer(){let t=20;document.querySelector(".primary").disabled=true;timer=setInterval(()=>{t--;time.textContent=t;if(t<=0){clearInterval(timer);tf.innerHTML=`<div class="feedback">⏰ Zeit! ${Q[i].why}</div><button onclick="timerResult(true)">✅ 6 oder mehr geschafft</button><button onclick="timerResult(false)">Noch nicht geschafft</button>`}},1000)}
+function timerResult(ok){if(locked)return;locked=true;if(ok)pts+=2;update();tf.innerHTML+=`<button class="primary" onclick="next()">Weiter →</button>`}
+function finish(){bar.style.width="100%";let max=15,rank=pts<=6?"Bio-Entdecker":pts<=10?"Bio-Checker":pts<=13?"Bio-Profi":"Bio-Champion";s.innerHTML=`<div class="center"><h1>${rank}</h1><p>Du hast <b>${pts} von ${max} Punkten</b> erreicht.</p><p>${pts>=11?"Stark! Dein Vorwissen sitzt schon ziemlich gut.":"Guter Start! Einige Dinge werden euch im neuen Schuljahr schnell wieder bekannt vorkommen."}</p><button class="primary" onclick="location.reload()">Neue Runde</button></div>`}
+</script></body></html>
