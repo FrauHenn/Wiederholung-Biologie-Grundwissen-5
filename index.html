@@ -43,21 +43,42 @@ function ans(n,b){if(locked)return;locked=true;let z=Q[i],bs=[...document.queryS
 function norm(s){return s.toLowerCase().trim().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[- ]/g,"")}
 function checkMammals(){
  if(locked)return;
- const entries=[1,2,3,4,5,6].map(n=>document.getElementById("m"+n).value.trim()).filter(Boolean);
- const unique=[...new Set(entries.map(norm))];
 
- if(entries.length<6){
+ const accepted = new Set([
+  "reh","rothirsch","damhirsch","wildschwein","rotfuchs","fuchs","dachs","igel",
+  "eichhoernchen","feldhase","hase","wildkaninchen","kaninchen","fledermaus",
+  "maulwurf","steinmarder","baummarder","marder","iltis","hermelin","mauswiesel",
+  "siebenschlaefer","haselmaus","biber","fischotter","luchs","wolf","wildkatze",
+  "waldmaus","feldmaus","spitzmaus","wasserspitzmaus","wanderratte","hausmaus",
+  "braunbaer","gaemse","steinbock","murmeltier","dachs","nutria","bisam"
+ ]);
+
+ const entries=[1,2,3,4,5,6].map(n=>document.getElementById("m"+n).value.trim());
+ const normalized=entries.map(norm);
+
+ if(entries.some(v=>v==="")){
    ifb.innerHTML="Bitte fülle zuerst alle sechs Lücken aus.";
    return;
  }
- if(unique.length<6){
-   ifb.innerHTML="Du hast mindestens ein Tier doppelt genannt. Trage sechs verschiedene Säugetiere ein.";
+ if(new Set(normalized).size<6){
+   ifb.innerHTML="Du hast mindestens ein Tier doppelt genannt. Trage sechs verschiedene einheimische Säugetiere ein.";
    return;
  }
+
+ const wrong=[];
+ normalized.forEach((v,idx)=>{
+   if(!accepted.has(v)) wrong.push(idx+1);
+ });
+
+ if(wrong.length){
+   ifb.innerHTML="Noch nicht ganz. Überprüfe "+(wrong.length===1?"Feld "+wrong[0]:"die Felder "+wrong.join(", "))+". Gesucht sind <b>einheimische Säugetiere</b> – also zum Beispiel keine Vögel, Fische, Amphibien oder Reptilien.";
+   return;
+ }
+
  locked=true;
  pts+=2;
  update();
- ifb.innerHTML="✅ <b>Geschafft!</b> Du hast sechs verschiedene Säugetiere eingetragen.";
+ ifb.innerHTML="✅ <b>Geschafft!</b> Du hast sechs verschiedene einheimische Säugetiere richtig genannt.";
  document.querySelector("#s .primary").outerHTML='<button class="primary" onclick="next()">Weiter →</button>';
 }
 function goTimer(){let t=20;document.querySelector(".primary").disabled=true;timer=setInterval(()=>{t--;time.textContent=t;if(t<=0){clearInterval(timer);tf.innerHTML=`<div class="feedback">⏰ Zeit! ${Q[i].why}</div><button onclick="timerResult(true)">✅ 6 oder mehr geschafft</button><button onclick="timerResult(false)">Noch nicht geschafft</button>`}},1000)}
