@@ -43,7 +43,7 @@ function ans(n,b){if(locked)return;locked=true;let z=Q[i],bs=[...document.queryS
 function norm(s){return s.toLowerCase().trim().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[- ]/g,"")}
 function checkMammals(){
  if(locked)return;
- const valid=["Reh","Rothirsch","Damhirsch","Wildschwein","Delfin","Rotfuchs","Fuchs","Dachs","Igel","Eichhoernchen","Feldhase","Hase","Wildkaninchen","Kaninchen","Fledermaus","Maulwurf","Steinmarder","Baummarder","Marder","Iltis","Hermelin","Mauswiesel","Siebenschlaefer","Biber","Fischotter","Luchs","Wolf","Wildkatze","Waldmaus","Feldmaus","Feldhamster","Zwergmaus","Hausmaus","Hausratte","Braunbär","Seehund","Kegelrobbe","Schweinswal","Gämse","Alpensteinbock","Steinbock","Spitzmaus","Haselmaus","Wanderratte","Wasserspitzmaus"];
+ const valid=["Reh","Rothirsch","Damhirsch","Wildschwein","Delfin","Rotfuchs","Fuchs","Dachs","Igel","Eichhörnchen","Feldhase","Hase","Wildkaninchen","Kaninchen","Fledermaus","Maulwurf","Steinmarder","Baummarder","Marder","Iltis","Hermelin","Mauswiesel","Siebenschlaefer","Biber","Fischotter","Luchs","Wolf","Wildkatze","Waldmaus","Feldmaus","Feldhamster","Zwergmaus","Hausmaus","Hausratte","Braunbär","Seehund","Kegelrobbe","Schweinswal","Gämse","Alpensteinbock","Steinbock","Spitzmaus","Haselmaus","Wanderratte","Wasserspitzmaus"];
  let vals=[1,2,3,4,5,6].map(n=>norm(document.getElementById("m"+n).value)).filter(Boolean);
  let unique=[...new Set(vals)], ok=unique.length===6 && unique.every(v=>valid.includes(v));
  if(ok){locked=true;pts+=2;update();ifb.innerHTML="✅ <b>Geschafft!</b> Sechs verschiedene einheimische Säugetiere.";document.querySelector("#s .primary").outerHTML='<button class="primary" onclick="next()">Weiter →</button>'}
