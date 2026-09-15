@@ -43,13 +43,24 @@ function ans(n,b){if(locked)return;locked=true;let z=Q[i],bs=[...document.queryS
 function norm(s){return s.toLowerCase().trim().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[- ]/g,"")}
 function checkMammals(){
  if(locked)return;
- const valid=["Reh","Rothirsch","Damhirsch","Wildschwein","Delfin","Rotfuchs","Fuchs","Dachs","Igel","Eichhörnchen","Feldhase","Hase","Wildkaninchen","Kaninchen","Fledermaus","Maulwurf","Steinmarder","Baummarder","Marder","Iltis","Hermelin","Mauswiesel","Siebenschlaefer","Biber","Fischotter","Luchs","Wolf","Wildkatze","Waldmaus","Feldmaus","Feldhamster","Zwergmaus","Hausmaus","Hausratte","Braunbär","Seehund","Kegelrobbe","Schweinswal","Gämse","Alpensteinbock","Steinbock","Spitzmaus","Haselmaus","Wanderratte","Wasserspitzmaus"];
- let vals=[1,2,3,4,5,6].map(n=>norm(document.getElementById("m"+n).value)).filter(Boolean);
- let unique=[...new Set(vals)], ok=unique.length===6 && unique.every(v=>valid.includes(v));
- if(ok){locked=true;pts+=2;update();ifb.innerHTML="✅ <b>Geschafft!</b> Sechs verschiedene einheimische Säugetiere.";document.querySelector("#s .primary").outerHTML='<button class="primary" onclick="next()">Weiter →</button>'}
- else {ifb.innerHTML="Noch nicht ganz. Prüfe, ob du <b>sechs verschiedene einheimische Säugetiere</b> eingetragen und richtig geschrieben hast."}
+ const entries=[1,2,3,4,5,6].map(n=>document.getElementById("m"+n).value.trim()).filter(Boolean);
+ const unique=[...new Set(entries.map(norm))];
+
+ if(entries.length<6){
+   ifb.innerHTML="Bitte fülle zuerst alle sechs Lücken aus.";
+   return;
+ }
+ if(unique.length<6){
+   ifb.innerHTML="Du hast mindestens ein Tier doppelt genannt. Trage sechs verschiedene Säugetiere ein.";
+   return;
+ }
+ locked=true;
+ pts+=2;
+ update();
+ ifb.innerHTML="✅ <b>Geschafft!</b> Du hast sechs verschiedene Säugetiere eingetragen.";
+ document.querySelector("#s .primary").outerHTML='<button class="primary" onclick="next()">Weiter →</button>';
 }
 function goTimer(){let t=20;document.querySelector(".primary").disabled=true;timer=setInterval(()=>{t--;time.textContent=t;if(t<=0){clearInterval(timer);tf.innerHTML=`<div class="feedback">⏰ Zeit! ${Q[i].why}</div><button onclick="timerResult(true)">✅ 6 oder mehr geschafft</button><button onclick="timerResult(false)">Noch nicht geschafft</button>`}},1000)}
 function timerResult(ok){if(locked)return;locked=true;if(ok)pts+=2;update();tf.innerHTML+=`<button class="primary" onclick="next()">Weiter →</button>`}
-function finish(){bar.style.width="100%";let max=15,rank=pts<=6?"Bio-Entdecker":pts<=10?"Bio-Checker":pts<=13?"Bio-Profi":"Bio-Champion";s.innerHTML=`<div class="center"><h1>${rank}</h1><p>Du hast <b>${pts} von ${max} Punkten</b> erreicht.</p><p>${pts>=11?"Stark! Dein Vorwissen sitzt schon ziemlich gut.":"Guter Start! Einige Dinge werden euch im neuen Schuljahr schnell wieder bekannt vorkommen."}</p><button class="primary" onclick="location.reload()">Neue Runde</button></div>`}
+function finish(){bar.style.width="100%";let max=16,rank=pts<=6?"Bio-Entdecker":pts<=10?"Bio-Checker":pts<=13?"Bio-Profi":"Bio-Champion";s.innerHTML=`<div class="center"><h1>${rank}</h1><p>Du hast <b>${pts} von ${max} Punkten</b> erreicht.</p><p>${pts>=11?"Stark! Dein Vorwissen sitzt schon ziemlich gut.":"Guter Start! Einige Dinge werden euch im neuen Schuljahr schnell wieder bekannt vorkommen."}</p><button class="primary" onclick="location.reload()">Challenge wiederholen</button></div>`}
 </script></body></html>
